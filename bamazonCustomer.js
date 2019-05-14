@@ -12,19 +12,28 @@ var connection = mysql.createConnection({
 //connect to database
 connection.connect(function(err) {
   if (err) throw err;
-  console.log("Welcome to Bamazon!");
+  console.log("Welcome to Bamazon!" + "\n");
 });
 // display table
 function displayTable() {
   connection.query("SELECT * FROM products", function(error, results) {
     if (error) throw error;
     for (i = 0; i < results.length; i++) {
-        console.log("id number: " + results[i].id +"\n"+"product name: "+ results[i].product_name + "\n"+"price: " + results[i].price + line);
-
+      console.log(
+        "id number: " +
+          results[i].id +
+          "\n" +
+          "product name: " +
+          results[i].product_name +
+          "\n" +
+          "price: " +
+          results[i].price +
+          line
+      );
     }
 
     purchase();
-    connection.end();
+    // connection.end();
   });
 }
 displayTable();
@@ -33,23 +42,28 @@ displayTable();
 // The second message should ask how many units of the product they would like to buy.
 function purchase() {
   inquirer
-    .prompt({
-      name: "item to buy",
-      type: "input",
-      message: "What is the id of the product you want to buy?"
-    })
+    .prompt([
+      {
+        name: "item",
+        type: "input",
+        message: "What is the id of the product you want to buy?"
+      },
+       {
+         name: "quantity",
+         type: "input",
+        message: "How many of this item would you like to purchase?"
+      }
+      ])
     .then(function(answer) {
-      var query = "SELECT id FROM products WHERE ?";
-      connection.query(query, { product: answer.id }, function(err, res) {
-         {
-          console.log("Your item: " + result.product_name);
-        }
-    
+      connection.query("SELECT * FROM products WHERE id = ?",  [answer.item],
+      function(err, results) {
+          if (err) throw err;
+        console.log("Your item: " + results[0].product_name);
+
+        //call next function
       });
     });
 }
-
-
 
 //step three check the inventory and let user know if item is available
 // If not, the app should log a phrase like Insufficient quantity!, and then prevent the order from going through.
