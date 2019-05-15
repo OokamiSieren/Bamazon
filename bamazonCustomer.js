@@ -8,6 +8,8 @@ var connection = mysql.createConnection({
   database: "bamazondb"
 });
 
+var quantity;
+
 //step one display products in table
 //connect to database
 connection.connect(function(err) {
@@ -48,25 +50,45 @@ function purchase() {
         type: "input",
         message: "What is the id of the product you want to buy?"
       },
-       {
-         name: "quantity",
-         type: "input",
+      {
+        name: "quantity",
+        type: "input",
         message: "How many of this item would you like to purchase?"
       }
-      ])
+    ])
     .then(function(answer) {
-      connection.query("SELECT * FROM products WHERE id = ?",  [answer.item],
-      function(err, results) {
+      connection.query(
+        "SELECT * FROM products WHERE id = ?",
+        [answer.item],
+        function(err, results) {
           if (err) throw err;
-        console.log("Your item: " + results[0].product_name);
+          console.log("Your item: " + results[0].product_name);
 
-        //call next function
-      });
+          inventory(quantity); //call next function passing inventory variable
+        }
+      );
     });
 }
-
+// new function for inventory
 //step three check the inventory and let user know if item is available
 // If not, the app should log a phrase like Insufficient quantity!, and then prevent the order from going through.
 // if your store does have enough of the product, you should fulfill the customer's order.
 // This means updating the SQL database to reflect the remaining quantity.
 // Once the update goes through, show the customer the total cost of their purchase.
+function inventory(answer) {
+  var quantity = answer.quantity;
+  if (quantity <= stock_quantity) {
+    connection.query(
+      "UPDATE products SET ? WHERE ?",
+      [
+        {
+          stock_quantity: (quantity - parseInt(stock_quantity))
+        }
+      ],
+
+      console.log("Thank You for your purchase!")
+    );
+  } else {
+    console.log("Insufficent quantity!");
+  }
+}
